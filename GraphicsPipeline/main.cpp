@@ -7,57 +7,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-GLuint imageToTexture(const cv::Mat& img)
+static int CreateShader(const std::string& vertexShader, const std::string& fragmentShader)
 {
-  GLuint textureId;
 
-  glGenTextures(1, &textureId);
-  glBindTexture(GL_TEXTURE_2D, textureId);
-
-  if (img.empty())
-    return textureId;
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-  // Set texture clamping method
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
-  cv::cvtColor(img, img, cv::COLOR_RGB2BGR);
-
-  glTexImage2D(GL_TEXTURE_2D,     // Type of texture
-               0,                 // Pyramid level (for mip-mapping) - 0 is the top level
-               GL_RGB,            // Internal colour format to convert to
-               img.cols,          // Image width  i.e. 640 for Kinect in standard mode
-               img.rows,          // Image height i.e. 480 for Kinect in standard mode
-               0,                 // Border width in pixels (can either be 1 or 0)
-               GL_RGB,            // Input image format (i.e. GL_RGB, GL_RGBA, GL_BGR etc.)
-               GL_UNSIGNED_BYTE,  // Image data type
-               img.ptr());        // The actual image data itself
-
-  return textureId;
-}
-
-void drawImage(int width, int height, const cv::Mat& img)
-{
-  glClear(GL_COLOR_BUFFER_BIT);
-
-  glMatrixMode(GL_MODELVIEW);     // Operate on model-view matrix
-
-  glEnable(GL_TEXTURE_2D);
-
-  GLuint tex = imageToTexture(img);
-
-  glBegin(GL_QUADS);
-  glTexCoord2i(0, 0); glVertex2i(-1, 1);
-  glTexCoord2i(0, 1); glVertex2i(-1, -1);
-  glTexCoord2i(1, 1); glVertex2i(1, -1);
-  glTexCoord2i(1, 0); glVertex2i(1, 1);
-  glEnd();
-
-  glDeleteTextures(1, &tex);
-  glDisable(GL_TEXTURE_2D);
 }
 
 int main()
@@ -66,7 +18,6 @@ int main()
   constexpr int width = 640;
 
   cv::Mat img;
-
   const std::string windowName{"TestOpenCV"};
   cv::namedWindow(windowName);
 
@@ -98,6 +49,29 @@ int main()
 
   glfwMakeContextCurrent(window);
 
+  if (glewInit() != GLEW_OK) {
+    std::cerr << "Failed to initialize GLEW" << std::endl;
+
+    return -1;
+  }
+
+  // Triangle section
+  float positions[] = {
+    -0.5f, -0.5f,
+     0.0f,  0.5f,
+     0.5f, -0.5f
+  };
+
+  unsigned int buffer;
+  glGenBuffers(1, &buffer);
+  glBindBuffer(GL_ARRAY_BUFFER, buffer);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
   while (!glfwWindowShouldClose(window)) {
     cap >> img;
 
@@ -107,9 +81,12 @@ int main()
     cv::imshow(windowName, img);
     cv::waitKey(25);
 
-    drawImage(width, height, img);
-    glfwSwapBuffers(window);
+    glClearColor(0.2, 0.7, 0.2, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
 
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    glfwSwapBuffers(window);
     glfwPollEvents();
   }
 
