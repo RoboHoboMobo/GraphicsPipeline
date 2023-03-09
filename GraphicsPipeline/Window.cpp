@@ -9,7 +9,7 @@ GlfwWindow::GlfwWindow(int width, int height, const std::string& name)
   if (!glfwInit())
     throw std::system_error({}, "Failed to initialize GLFW");
 
-  m_window = glfwCreateWindow(width, height, "TestOpenGL", {}, {});
+  m_window = glfwCreateWindow(width, height, name.c_str(), {}, {});
 
   if (!m_window) {
     glfwTerminate();

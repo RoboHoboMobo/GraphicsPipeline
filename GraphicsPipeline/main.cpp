@@ -13,6 +13,7 @@
 #include "Shader.h"
 #include "Renderer.h"
 #include "Window.h"
+#include "Texture.h"
 
 int main()
 {
@@ -31,7 +32,8 @@ int main()
     return -1;
   }
 
-  std::shared_ptr<Window> window = std::make_shared<GlfwWindow>(width, height, "TestOpenGL");
+  std::shared_ptr<Window> window =
+      std::make_shared<GlfwWindow>(width, height, "TestOpenGL");
 
   if (glewInit() != GLEW_OK) {
     std::cerr << "Failed to initialize GLEW" << std::endl;
@@ -40,10 +42,10 @@ int main()
   }
 
   const std::vector<float> positions{
-    -0.5f, -0.5f,
-     0.5f,  0.5f,
-     0.5f, -0.5f,
-    -0.5f,  0.5f
+    -0.5f, -0.5f, 0.0f, 0.0f,
+     0.5f,  0.5f, 1.0f, 1.0f,
+     0.5f, -0.5f, 1.0f, 0.0f,
+    -0.5f,  0.5f, 0.0f, 1.0f
   };
 
   const std::vector<unsigned int> indicies{
@@ -58,7 +60,8 @@ int main()
   VertexBuffer vb(positions.data(), sizeof(float) * positions.size());
 
   VertexBufferLayout layout;
-  layout.push<float>(2);
+  layout.push<float>(2); // Vertex positions
+  layout.push<float>(2); // Texture positions
 
   va.addBuffer(vb, layout);
 
@@ -66,10 +69,14 @@ int main()
   IndexBuffer ib(indicies.data(), indicies.size());
 
   // Shaders
-  Shader shader("res/shaders/shader.vertex", "res/shaders/shader.fragment");
+  Shader shader("res/shaders/vertex.shader", "res/shaders/fragment.shader");
   shader.bind();
 
   Renderer renderer;
+
+  Texture texture("res/textures/pikachu.png");
+  texture.bind();
+  shader.setUniform1i("u_Texture", 0);
 
   // Unbind all
   va.unbind();
