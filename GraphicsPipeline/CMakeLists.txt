@@ -19,6 +19,7 @@ set(HEADERS
     IndexBuffer.h
     VertexArray.h
     VertexBufferLayout.h
+    Shader.h
     )
 
 set(SOURCES
@@ -27,6 +28,7 @@ set(SOURCES
     IndexBuffer.cpp
     VertexArray.cpp
     VertexBufferLayout.cpp
+    Shader.cpp
     )
 
 add_executable(GraphicsPipeline main.cpp ${HEADERS} ${SOURCES})

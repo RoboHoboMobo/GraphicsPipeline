@@ -1,7 +1,4 @@
 #include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
 
 // OpenCV
 #include <opencv2/opencv.hpp>
@@ -10,78 +7,10 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-// Helpers
 #include "IndexBuffer.h"
 #include "VertexBuffer.h"
 #include "VertexArray.h"
-
-std::string parseShader(const std::string& filepath)
-{
-  std::fstream file(filepath);
-  std::string str;
-  std::stringstream ss;
-
-  bool isOk{};
-  while (getline(file, str)) {
-    if (str.find("#version") != std::string::npos)
-      isOk = true;
-
-    ss << str << '\n';
-  }
-
-  if (!isOk)
-    std::cerr << "Failed to parse " << filepath << "shader"<< std::endl;
-
-  return isOk ? ss.str() : std::string();
-}
-
-static unsigned int compileShader(unsigned int shaderType, const std::string& source)
-{
-  unsigned int id = glCreateShader(shaderType);
-  const char* src = source.c_str();
-  glShaderSource(id, 1, &src, nullptr);
-  glCompileShader(id);
-
-  int result{};
-  glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-
-  if (!result) {
-    int len{};
-    glGetShaderiv(id, GL_INFO_LOG_LENGTH, &len);
-    char* message = static_cast<char*>(alloca(len * sizeof(char)));
-    glGetShaderInfoLog(id, len, &len, message);
-
-    std::string typeString = shaderType == GL_VERTEX_SHADER ? "vertex" : "fragment";
-
-    std::cerr << "Failed to compile " << typeString << "shader"<< std::endl;
-    std::cerr << message << std::endl;
-
-    glDeleteShader(id);
-
-    return 0;
-  }
-
-  return id;
-}
-
-static unsigned int createShader(const std::string& vertexShader,
-                                 const std::string& fragmentShader)
-{
-  unsigned int prog = glCreateProgram();
-  unsigned int vs = compileShader(GL_VERTEX_SHADER, vertexShader);
-  unsigned int fs = compileShader(GL_FRAGMENT_SHADER, fragmentShader);
-
-  glAttachShader(prog, vs);
-  glAttachShader(prog, fs);
-
-  glLinkProgram(prog);
-  glValidateProgram(prog);
-
-  glDeleteShader(vs);
-  glDeleteShader(fs);
-
-  return prog;
-}
+#include "Shader.h"
 
 int main()
 {
@@ -153,16 +82,15 @@ int main()
     // Index (element) buffer
     IndexBuffer ib(indicies.data(), indicies.size());
 
-    const std::string vertexShader = parseShader("res/shaders/shader.vertex");
-    const std::string fragmentShader = parseShader("res/shaders/shader.fragment");
-    unsigned int shader = createShader(vertexShader, fragmentShader);
-    glUseProgram(shader);
+    // Shaders
+    Shader shader("res/shaders/shader.vertex", "res/shaders/shader.fragment");
+    shader.bind();
 
     // Unbind all
     va.unbind();
-    glUseProgram(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    shader.unbind();
+    vb.unbind();
+    ib.unbind();
 
     while (!glfwWindowShouldClose(window)) {
       cap >> img;
@@ -177,7 +105,7 @@ int main()
       glClear(GL_COLOR_BUFFER_BIT);
 
       // Bind all
-      glUseProgram(shader);
+      shader.bind();
       va.bind();
       ib.bind();
 
@@ -186,9 +114,6 @@ int main()
       glfwSwapBuffers(window);
       glfwPollEvents();
     }
-
-    glDeleteProgram(shader);
-
   }
 
   cap.release();
