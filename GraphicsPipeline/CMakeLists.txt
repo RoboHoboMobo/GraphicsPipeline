@@ -20,6 +20,7 @@ set(HEADERS
     VertexArray.h
     VertexBufferLayout.h
     Shader.h
+    Window.h
     )
 
 set(SOURCES
@@ -29,6 +30,7 @@ set(SOURCES
     VertexArray.cpp
     VertexBufferLayout.cpp
     Shader.cpp
+    Window.cpp
     )
 
 add_executable(GraphicsPipeline main.cpp ${HEADERS} ${SOURCES})
