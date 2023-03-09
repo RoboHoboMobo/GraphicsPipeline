@@ -11,8 +11,16 @@ find_package(GLEW REQUIRED)
 
 include_directories(${OPENGL_INCLUDE_DIRS})
 include_directories(${GLEW_INCLUDE_DIRS})
+include_directories(${PROJECT_SOURCE_DIR}/res/shaders)
 
 add_executable(GraphicsPipeline main.cpp)
+
+add_custom_target(copy_resources ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${PROJECT_SOURCE_DIR}/res
+    ${PROJECT_BINARY_DIR}/res)
+
+add_dependencies(GraphicsPipeline copy_resources)
 
 set(OPENGL_LIBRARIES ${OPENGL_LIBRARY} glfw ${GLEW_LIBRARIES})
 
