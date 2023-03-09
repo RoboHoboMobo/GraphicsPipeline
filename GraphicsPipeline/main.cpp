@@ -10,6 +10,10 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+// Helpers
+#include "IndexBuffer.h"
+#include "VertexBuffer.h"
+
 std::string parseShader(const std::string& filepath)
 {
   std::fstream file(filepath);
@@ -121,75 +125,73 @@ int main()
     return -1;
   }
 
-  // Square section
-  float positions[] = {
-    -0.5f, -0.5f,
-     0.5f,  0.5f,
-     0.5f, -0.5f,
-    -0.5f,  0.5f
-  };
+  { // scope in order to call ~VertexBuffer() before context destruction
+    const std::vector<float> positions{
+      -0.5f, -0.5f,
+       0.5f,  0.5f,
+       0.5f, -0.5f,
+      -0.5f,  0.5f
+    };
 
-  unsigned char indicies[] = {
-    0, 1, 2,
-    0, 1, 3
-  };
+    const std::vector<unsigned int> indicies{
+      0, 1, 2,
+      0, 1, 3
+    };
 
-  // Vertex Array
-  unsigned int vao;
-  glGenVertexArrays(1, &vao);
-  glBindVertexArray(vao);
-
-  // Vertex buffer
-  unsigned int buffer;
-  glGenBuffers(1, &buffer);
-  glBindBuffer(GL_ARRAY_BUFFER, buffer);
-  glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(positions), positions, GL_STATIC_DRAW);
-
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0); // bind vertex buffer and vao
-
-  // Index (element) buffer
-  unsigned int ibo;
-  glGenBuffers(1, &ibo);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
-
-  const std::string vertexShader = parseShader("res/shaders/shader.vertex");
-  const std::string fragmentShader = parseShader("res/shaders/shader.fragment");
-  unsigned int shader = createShader(vertexShader, fragmentShader);
-  glUseProgram(shader);
-
-  // Unbind all
-  glBindVertexArray(0);
-  glUseProgram(0);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-  while (!glfwWindowShouldClose(window)) {
-    cap >> img;
-
-    if (img.empty())
-      continue;
-
-    cv::imshow(windowName, img);
-    cv::waitKey(25);
-
-    glClearColor(0.2, 0.7, 0.2, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    // Bind all
-    glUseProgram(shader);
+    // Vertex Array
+    unsigned int vao;
+    glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, nullptr);
+    // Vertex buffer
+    VertexBuffer vb(positions.data(), sizeof(float) * positions.size());
 
-    glfwSwapBuffers(window);
-    glfwPollEvents();
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0); // bind vertex buffer and vao
+
+    // Index (element) buffer
+    IndexBuffer ibo(indicies.data(), indicies.size());
+
+    const std::string vertexShader = parseShader("res/shaders/shader.vertex");
+    const std::string fragmentShader = parseShader("res/shaders/shader.fragment");
+    unsigned int shader = createShader(vertexShader, fragmentShader);
+    glUseProgram(shader);
+
+    // Unbind all
+    glBindVertexArray(0);
+    glUseProgram(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    while (!glfwWindowShouldClose(window)) {
+      cap >> img;
+
+      if (img.empty())
+        continue;
+
+      cv::imshow(windowName, img);
+      cv::waitKey(25);
+
+      glClearColor(0.2, 0.7, 0.2, 1.0);
+      glClear(GL_COLOR_BUFFER_BIT);
+
+      // Bind all
+      glUseProgram(shader);
+      glBindVertexArray(vao);
+      ibo.bind();
+
+      glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+      glfwSwapBuffers(window);
+      glfwPollEvents();
+    }
+
+    glDeleteProgram(shader);
+
   }
 
-  glDeleteProgram(shader);
   cap.release();
+
   glfwDestroyWindow(window);
   glfwTerminate();
 

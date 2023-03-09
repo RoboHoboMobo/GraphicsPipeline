@@ -13,7 +13,19 @@ include_directories(${OPENGL_INCLUDE_DIRS})
 include_directories(${GLEW_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/res/shaders)
 
-add_executable(GraphicsPipeline main.cpp)
+set(HEADERS
+    Renderer.h
+    VertexBuffer.h
+    IndexBuffer.h
+    )
+
+set(SOURCES
+    Renderer.cpp
+    VertexBuffer.cpp
+    IndexBuffer.cpp
+    )
+
+add_executable(GraphicsPipeline main.cpp ${HEADERS} ${SOURCES})
 
 add_custom_target(copy_resources ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
