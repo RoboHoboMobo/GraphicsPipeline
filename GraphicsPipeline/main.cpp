@@ -1,4 +1,7 @@
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
 
 // OpenCV
 #include <opencv2/opencv.hpp>
@@ -7,26 +10,25 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-const std::string vertexShader =
-  "#version 330 core\n"
-  "\n"
-  "layout(location = 0) in vec4 position;\n" // because gl_Position is vec4
-  "\n"
-  "void main()\n"
-  "{\n"
-  "   gl_Position = position;\n"
-  "}\n";
+std::string parseShader(const std::string& filepath)
+{
+  std::fstream file(filepath);
+  std::string str;
+  std::stringstream ss;
 
-const std::string fragmentShader =
-  "#version 330 core\n"
-  "\n"
-  "layout(location = 0) out vec4 color;\n"
-  "\n"
-  "void main()\n"
-  "{\n"
-  "   color = vec4(0.5, 0.5, 0.5, 1.0);\n"
-  "}\n";
+  bool isOk{};
+  while (getline(file, str)) {
+    if (str.find("#version") != std::string::npos)
+      isOk = true;
 
+    ss << str << '\n';
+  }
+
+  if (!isOk)
+    std::cerr << "Failed to parse " << filepath << "shader"<< std::endl;
+
+  return isOk ? ss.str() : std::string();
+}
 
 static unsigned int compileShader(unsigned int shaderType, const std::string& source)
 {
@@ -136,6 +138,8 @@ int main()
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+  const std::string vertexShader = parseShader("res/shaders/shader.vertex");
+  const std::string fragmentShader = parseShader("res/shaders/shader.fragment");
   unsigned int shader = createShader(vertexShader, fragmentShader);
   glUseProgram(shader);
 
@@ -157,6 +161,7 @@ int main()
     glfwPollEvents();
   }
 
+  glDeleteProgram(shader);
   cap.release();
   glfwDestroyWindow(window);
   glfwTerminate();
