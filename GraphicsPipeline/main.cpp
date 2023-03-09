@@ -13,6 +13,7 @@
 // Helpers
 #include "IndexBuffer.h"
 #include "VertexBuffer.h"
+#include "VertexArray.h"
 
 std::string parseShader(const std::string& filepath)
 {
@@ -139,18 +140,18 @@ int main()
     };
 
     // Vertex Array
-    unsigned int vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    VertexArray va;
 
     // Vertex buffer
     VertexBuffer vb(positions.data(), sizeof(float) * positions.size());
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0); // bind vertex buffer and vao
+    VertexBufferLayout layout;
+    layout.push<float>(2);
+
+    va.addBuffer(vb, layout);
 
     // Index (element) buffer
-    IndexBuffer ibo(indicies.data(), indicies.size());
+    IndexBuffer ib(indicies.data(), indicies.size());
 
     const std::string vertexShader = parseShader("res/shaders/shader.vertex");
     const std::string fragmentShader = parseShader("res/shaders/shader.fragment");
@@ -158,7 +159,7 @@ int main()
     glUseProgram(shader);
 
     // Unbind all
-    glBindVertexArray(0);
+    va.unbind();
     glUseProgram(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -177,8 +178,8 @@ int main()
 
       // Bind all
       glUseProgram(shader);
-      glBindVertexArray(vao);
-      ibo.bind();
+      va.bind();
+      ib.bind();
 
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 

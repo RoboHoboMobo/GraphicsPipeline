@@ -17,15 +17,20 @@ set(HEADERS
     Renderer.h
     VertexBuffer.h
     IndexBuffer.h
+    VertexArray.h
+    VertexBufferLayout.h
     )
 
 set(SOURCES
     Renderer.cpp
     VertexBuffer.cpp
     IndexBuffer.cpp
+    VertexArray.cpp
+    VertexBufferLayout.cpp
     )
 
 add_executable(GraphicsPipeline main.cpp ${HEADERS} ${SOURCES})
+target_compile_features(GraphicsPipeline PRIVATE cxx_std_17)
 
 add_custom_target(copy_resources ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
