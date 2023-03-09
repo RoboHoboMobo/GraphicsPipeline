@@ -1,5 +1,7 @@
 #include "VertexBufferLayout.h"
 
+#include <GL/glew.h>
+
 void VertexBufferLayout::push(unsigned int count, float)
 {
   m_elements.push_back({GL_FLOAT, count, false});

@@ -1,8 +1,8 @@
 #include "IndexBuffer.h"
 
-#include "Renderer.h"
-
 #include <cassert>
+
+#include <GL/glew.h>
 
 IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int num)
   : m_rendererId{}

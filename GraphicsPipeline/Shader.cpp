@@ -1,10 +1,10 @@
 #include "Shader.h"
 
-#include "Renderer.h"
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
+
+#include <GL/glew.h>
 
 Shader::Shader(const std::string& vertexShaderPath,
                const std::string& fragmentShaderPath)

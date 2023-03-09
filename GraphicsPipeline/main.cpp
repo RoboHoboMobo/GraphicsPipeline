@@ -11,6 +11,7 @@
 #include "VertexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "Renderer.h"
 
 int main()
 {
@@ -86,6 +87,8 @@ int main()
     Shader shader("res/shaders/shader.vertex", "res/shaders/shader.fragment");
     shader.bind();
 
+    Renderer renderer;
+
     // Unbind all
     va.unbind();
     shader.unbind();
@@ -101,15 +104,10 @@ int main()
       cv::imshow(windowName, img);
       cv::waitKey(25);
 
-      glClearColor(0.2, 0.7, 0.2, 1.0);
-      glClear(GL_COLOR_BUFFER_BIT);
+      renderer.setClearColor({0.3, 0.8, 0.3, 1.0});
+      renderer.clear();
 
-      // Bind all
-      shader.bind();
-      va.bind();
-      ib.bind();
-
-      glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+      renderer.draw(va, ib, shader);
 
       glfwSwapBuffers(window);
       glfwPollEvents();

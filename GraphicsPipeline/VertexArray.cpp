@@ -1,5 +1,7 @@
 #include "VertexArray.h"
 
+#include <GL/glew.h>
+
 VertexArray::VertexArray()
   : m_rendererId{}
 {

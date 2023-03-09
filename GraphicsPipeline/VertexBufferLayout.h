@@ -2,8 +2,6 @@
 
 #include <vector>
 
-#include <GL/glew.h>
-
 struct VertexBufferElement {
   unsigned int type;
   unsigned int count;
