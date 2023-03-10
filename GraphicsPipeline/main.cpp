@@ -7,6 +7,10 @@
 // OpenGL
 #include <GL/glew.h>
 
+// GLM
+#include <glm/ext/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale
+#include <glm/ext/matrix_clip_space.hpp> // glm::perspective
+
 #include "IndexBuffer.h"
 #include "VertexBuffer.h"
 #include "VertexArray.h"
@@ -14,6 +18,9 @@
 #include "Renderer.h"
 #include "Window.h"
 #include "Texture.h"
+
+const std::map<std::string, float> perspectivePreset{{"fov", glm::radians(63.0f)},
+                                                     {"near", 1.0f}, {"far", 10000.0f}};
 
 int main()
 {
@@ -49,10 +56,10 @@ int main()
     -1.0f,  1.0f, 0.0f, 1.0f,
 
     // Front
-    -0.5f, -0.5f, 0.0f, 0.0f,
-     0.5f,  0.5f, 1.0f, 1.0f,
-     0.5f, -0.5f, 1.0f, 0.0f,
-    -0.5f,  0.5f, 0.0f, 1.0f
+    -0.25f, -0.25f, 0.0f, 0.0f,
+     0.25f,  0.25f, 1.0f, 1.0f,
+     0.25f, -0.25f, 1.0f, 0.0f,
+    -0.25f,  0.25f, 0.0f, 1.0f
   };
 
   unsigned int offset = 0; // Num of vertices
@@ -86,18 +93,31 @@ int main()
   IndexBuffer ibFront(indiciesFront.data(), indiciesFront.size());
 
   // Shaders
-  Shader shader("res/shaders/vertex.shader", "res/shaders/fragment.shader");
-  shader.bind();
+  Shader shaderBackground("res/shaders/vertex.shader", "res/shaders/fragment.shader");
+  Shader shaderFront("res/shaders/vertex.shader", "res/shaders/fragment.shader");
 
   Renderer renderer;
 
+  shaderFront.bind();
   Texture textureFront("res/textures/pikachu.png");
   textureFront.bind(0);
-  shader.setUniform1i("u_Texture", 0);
+  shaderFront.setUniform1i("u_Texture", 0);
+
+  glm::mat4 projection = glm::perspective(perspectivePreset.at("fov"),
+                                          (float)width / (float)height,
+                                          perspectivePreset.at("near"),
+                                          perspectivePreset.at("far"));
+
+  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+
+  glm::mat4 mvp = projection * model;
+
+  shaderFront.setUniformMat4f("u_mvp", mvp);
 
   // Unbind all
   va.unbind();
-  shader.unbind();
+  shaderBackground.unbind();
+  shaderFront.unbind();
   vb.unbind();
   ibBackground.unbind();
   ibFront.unbind();
@@ -115,12 +135,15 @@ int main()
     renderer.setClearColor({0.3, 0.8, 0.3, 1.0});
     renderer.clear();
 
+    shaderBackground.bind();
     Texture textureBackground(img);
     textureBackground.bind(0);
-    renderer.draw(va, ibBackground, shader);
+    renderer.draw(va, ibBackground, shaderBackground);
+
+    shaderBackground.unbind();
 
     textureFront.bind(0);
-    renderer.draw(va, ibFront, shader);
+    renderer.draw(va, ibFront, shaderFront);
 
     window->swapBuffer();
     window->pollEvents();
