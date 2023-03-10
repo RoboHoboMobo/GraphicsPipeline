@@ -1,10 +1,14 @@
 #pragma once
 
 #include <string>
+#include <memory>
+
+#include <opencv2/opencv.hpp>
 
 class Texture {
 public:
   Texture(const std::string& path);
+  Texture(const cv::Mat& img);
   ~Texture();
 
   void bind(unsigned int slot = 0) const;
@@ -16,7 +20,7 @@ public:
 private:
   unsigned int m_rendererId;
   std::string m_filePath;
-  unsigned char* m_localBuffer;
+  std::shared_ptr<unsigned char> m_localBuffer;
   int m_width;
   int m_height;
   int m_bpp;

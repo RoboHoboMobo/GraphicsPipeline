@@ -91,8 +91,8 @@ int main()
 
   Renderer renderer;
 
-  Texture texture("res/textures/pikachu.png");
-  texture.bind();
+  Texture textureFront("res/textures/pikachu.png");
+  textureFront.bind(0);
   shader.setUniform1i("u_Texture", 0);
 
   // Unbind all
@@ -101,6 +101,7 @@ int main()
   vb.unbind();
   ibBackground.unbind();
   ibFront.unbind();
+  textureFront.unbind();
 
   while (!window->isShouldBeClosed()) {
     cap >> img;
@@ -114,7 +115,11 @@ int main()
     renderer.setClearColor({0.3, 0.8, 0.3, 1.0});
     renderer.clear();
 
+    Texture textureBackground(img);
+    textureBackground.bind(0);
     renderer.draw(va, ibBackground, shader);
+
+    textureFront.bind(0);
     renderer.draw(va, ibFront, shader);
 
     window->swapBuffer();
