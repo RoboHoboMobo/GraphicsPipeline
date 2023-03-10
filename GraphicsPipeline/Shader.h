@@ -13,6 +13,7 @@ public:
   void bind() const;
   void unbind() const;
 
+  void setUniform1i(const std::string& name, int value);
   void setUniform4f(const std::string& name, const std::vector<float>& v);
 
 private:

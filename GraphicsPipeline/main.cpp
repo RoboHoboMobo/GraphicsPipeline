@@ -13,6 +13,7 @@
 #include "Shader.h"
 #include "Renderer.h"
 #include "Window.h"
+#include "Texture.h"
 
 int main()
 {
@@ -31,7 +32,8 @@ int main()
     return -1;
   }
 
-  std::shared_ptr<Window> window = std::make_shared<GlfwWindow>(width, height, "TestOpenGL");
+  std::shared_ptr<Window> window =
+      std::make_shared<GlfwWindow>(width, height, "TestOpenGL");
 
   if (glewInit() != GLEW_OK) {
     std::cerr << "Failed to initialize GLEW" << std::endl;
@@ -40,15 +42,31 @@ int main()
   }
 
   const std::vector<float> positions{
-    -0.5f, -0.5f,
-     0.5f,  0.5f,
-     0.5f, -0.5f,
-    -0.5f,  0.5f
+    // Background
+    -1.0f, -1.0f, 0.0f, 0.0f,
+     1.0f,  1.0f, 1.0f, 1.0f,
+     1.0f, -1.0f, 1.0f, 0.0f,
+    -1.0f,  1.0f, 0.0f, 1.0f,
+
+    // Front
+    -0.5f, -0.5f, 0.0f, 0.0f,
+     0.5f,  0.5f, 1.0f, 1.0f,
+     0.5f, -0.5f, 1.0f, 0.0f,
+    -0.5f,  0.5f, 0.0f, 1.0f
   };
 
-  const std::vector<unsigned int> indicies{
-    0, 1, 2,
-    0, 1, 3
+  unsigned int offset = 0; // Num of vertices
+
+  const std::vector<unsigned int> indiciesBackground{
+    offset + 0, offset + 1, offset + 2,
+    offset + 0, offset + 1, offset + 3
+  };
+
+  offset += 4;
+
+  const std::vector<unsigned int> indiciesFront{
+    offset + 0, offset + 1, offset + 2,
+    offset + 0, offset + 1, offset + 3
   };
 
   // Vertex Array
@@ -58,24 +76,32 @@ int main()
   VertexBuffer vb(positions.data(), sizeof(float) * positions.size());
 
   VertexBufferLayout layout;
-  layout.push<float>(2);
+  layout.push<float>(2); // Vertex positions
+  layout.push<float>(2); // Texture positions
 
   va.addBuffer(vb, layout);
 
   // Index (element) buffer
-  IndexBuffer ib(indicies.data(), indicies.size());
+  IndexBuffer ibBackground(indiciesBackground.data(), indiciesBackground.size());
+  IndexBuffer ibFront(indiciesFront.data(), indiciesFront.size());
 
   // Shaders
-  Shader shader("res/shaders/shader.vertex", "res/shaders/shader.fragment");
+  Shader shader("res/shaders/vertex.shader", "res/shaders/fragment.shader");
   shader.bind();
 
   Renderer renderer;
+
+  Texture textureFront("res/textures/pikachu.png");
+  textureFront.bind(0);
+  shader.setUniform1i("u_Texture", 0);
 
   // Unbind all
   va.unbind();
   shader.unbind();
   vb.unbind();
-  ib.unbind();
+  ibBackground.unbind();
+  ibFront.unbind();
+  textureFront.unbind();
 
   while (!window->isShouldBeClosed()) {
     cap >> img;
@@ -89,7 +115,12 @@ int main()
     renderer.setClearColor({0.3, 0.8, 0.3, 1.0});
     renderer.clear();
 
-    renderer.draw(va, ib, shader);
+    Texture textureBackground(img);
+    textureBackground.bind(0);
+    renderer.draw(va, ibBackground, shader);
+
+    textureFront.bind(0);
+    renderer.draw(va, ibFront, shader);
 
     window->swapBuffer();
     window->pollEvents();

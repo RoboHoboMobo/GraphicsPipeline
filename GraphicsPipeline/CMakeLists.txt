@@ -13,6 +13,8 @@ include_directories(${OPENGL_INCLUDE_DIRS})
 include_directories(${GLEW_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/res/shaders)
 
+set(STB_IMAGE_DIR vendor/stb_image)
+
 set(HEADERS
     Renderer.h
     VertexBuffer.h
@@ -21,6 +23,8 @@ set(HEADERS
     VertexBufferLayout.h
     Shader.h
     Window.h
+    ${STB_IMAGE_DIR}/stb_image.h
+    Texture.h
     )
 
 set(SOURCES
@@ -31,9 +35,19 @@ set(SOURCES
     VertexBufferLayout.cpp
     Shader.cpp
     Window.cpp
+    ${STB_IMAGE_DIR}/stb_image.cpp
+    Texture.cpp
     )
 
-add_executable(GraphicsPipeline main.cpp ${HEADERS} ${SOURCES})
+set(RESOURCES_DIR ${PROJECT_SOURCE_DIR}/res)
+set(SHADERS_DIR ${RESOURCES_DIR}/shaders)
+
+set(SHADERS
+    ${SHADERS_DIR}/fragment.shader
+    ${SHADERS_DIR}/vertex.shader
+    )
+
+add_executable(GraphicsPipeline main.cpp ${HEADERS} ${SOURCES} ${SHADERS})
 target_compile_features(GraphicsPipeline PRIVATE cxx_std_17)
 
 add_custom_target(copy_resources ALL
