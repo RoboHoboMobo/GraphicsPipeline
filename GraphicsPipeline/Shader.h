@@ -4,6 +4,8 @@
 #include <vector>
 #include <unordered_map>
 
+#include <glm/glm.hpp>
+
 class Shader
 {
 public:
@@ -15,6 +17,7 @@ public:
 
   void setUniform1i(const std::string& name, int value);
   void setUniform4f(const std::string& name, const std::vector<float>& v);
+  void setUniformMat4f(const std::string& name, const glm::mat4& matrix);
 
 private:
   int getUniformLocation(const std::string& name);
