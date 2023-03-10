@@ -42,15 +42,31 @@ int main()
   }
 
   const std::vector<float> positions{
+    // Background
+    -1.0f, -1.0f, 0.0f, 0.0f,
+     1.0f,  1.0f, 1.0f, 1.0f,
+     1.0f, -1.0f, 1.0f, 0.0f,
+    -1.0f,  1.0f, 0.0f, 1.0f,
+
+    // Front
     -0.5f, -0.5f, 0.0f, 0.0f,
      0.5f,  0.5f, 1.0f, 1.0f,
      0.5f, -0.5f, 1.0f, 0.0f,
     -0.5f,  0.5f, 0.0f, 1.0f
   };
 
-  const std::vector<unsigned int> indicies{
-    0, 1, 2,
-    0, 1, 3
+  unsigned int offset = 0; // Num of vertices
+
+  const std::vector<unsigned int> indiciesBackground{
+    offset + 0, offset + 1, offset + 2,
+    offset + 0, offset + 1, offset + 3
+  };
+
+  offset += 4;
+
+  const std::vector<unsigned int> indiciesFront{
+    offset + 0, offset + 1, offset + 2,
+    offset + 0, offset + 1, offset + 3
   };
 
   // Vertex Array
@@ -66,7 +82,8 @@ int main()
   va.addBuffer(vb, layout);
 
   // Index (element) buffer
-  IndexBuffer ib(indicies.data(), indicies.size());
+  IndexBuffer ibBackground(indiciesBackground.data(), indiciesBackground.size());
+  IndexBuffer ibFront(indiciesFront.data(), indiciesFront.size());
 
   // Shaders
   Shader shader("res/shaders/vertex.shader", "res/shaders/fragment.shader");
@@ -82,7 +99,8 @@ int main()
   va.unbind();
   shader.unbind();
   vb.unbind();
-  ib.unbind();
+  ibBackground.unbind();
+  ibFront.unbind();
 
   while (!window->isShouldBeClosed()) {
     cap >> img;
@@ -96,7 +114,8 @@ int main()
     renderer.setClearColor({0.3, 0.8, 0.3, 1.0});
     renderer.clear();
 
-    renderer.draw(va, ib, shader);
+    renderer.draw(va, ibBackground, shader);
+    renderer.draw(va, ibFront, shader);
 
     window->swapBuffer();
     window->pollEvents();
