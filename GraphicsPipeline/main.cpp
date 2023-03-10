@@ -19,6 +19,9 @@
 #include "Window.h"
 #include "Texture.h"
 
+const std::map<std::string, float> perspectivePreset{{"fov", glm::radians(63.0f)},
+                                                     {"near", 1.0f}, {"far", 10000.0f}};
+
 int main()
 {
   constexpr int height = 480;
@@ -100,10 +103,12 @@ int main()
   textureFront.bind(0);
   shaderFront.setUniform1i("u_Texture", 0);
 
-  glm::mat4 projection = glm::perspective(glm::radians(45.0f),
-                                          (float)width / (float)height, 0.1f, 100.f);
+  glm::mat4 projection = glm::perspective(perspectivePreset.at("fov"),
+                                          (float)width / (float)height,
+                                          perspectivePreset.at("near"),
+                                          perspectivePreset.at("far"));
 
-  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -2.0f));
+  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.0f));
 
   glm::mat4 mvp = projection * model;
 
