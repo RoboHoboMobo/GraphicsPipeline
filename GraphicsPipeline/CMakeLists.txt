@@ -11,32 +11,35 @@ find_package(GLEW REQUIRED)
 
 include_directories(${OPENGL_INCLUDE_DIRS})
 include_directories(${GLEW_INCLUDE_DIRS})
+include_directories(${PROJECT_SOURCE_DIR}/src)
+include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/res/shaders)
+include_directories(${PROJECT_SOURCE_DIR}/third_party)
 
-set(STB_IMAGE_DIR vendor/stb_image)
+set(STB_IMAGE_DIR third_party/stb_image)
 
 set(HEADERS
-    Renderer.h
-    VertexBuffer.h
-    IndexBuffer.h
-    VertexArray.h
-    VertexBufferLayout.h
-    Shader.h
-    Window.h
+    include/Renderer.h
+    include/VertexBuffer.h
+    include/IndexBuffer.h
+    include/VertexArray.h
+    include/VertexBufferLayout.h
+    include/Shader.h
+    include/Window.h
+    include/Texture.h
     ${STB_IMAGE_DIR}/stb_image.h
-    Texture.h
     )
 
 set(SOURCES
-    Renderer.cpp
-    VertexBuffer.cpp
-    IndexBuffer.cpp
-    VertexArray.cpp
-    VertexBufferLayout.cpp
-    Shader.cpp
-    Window.cpp
+    src/Renderer.cpp
+    src/VertexBuffer.cpp
+    src/IndexBuffer.cpp
+    src/VertexArray.cpp
+    src/VertexBufferLayout.cpp
+    src/Shader.cpp
+    src/Window.cpp
+    src/Texture.cpp
     ${STB_IMAGE_DIR}/stb_image.cpp
-    Texture.cpp
     )
 
 set(RESOURCES_DIR ${PROJECT_SOURCE_DIR}/res)
@@ -47,7 +50,7 @@ set(SHADERS
     ${SHADERS_DIR}/vertex.shader
     )
 
-add_executable(GraphicsPipeline main.cpp ${HEADERS} ${SOURCES} ${SHADERS})
+add_executable(GraphicsPipeline src/main.cpp ${HEADERS} ${SOURCES} ${SHADERS})
 target_compile_features(GraphicsPipeline PRIVATE cxx_std_17)
 
 add_custom_target(copy_resources ALL
