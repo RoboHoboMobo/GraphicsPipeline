@@ -14,7 +14,7 @@ include_directories(${GLEW_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/res/shaders)
-include_directories(${PROJECT_SOURCE_DIR}/third_party)
+include_directories(${PROJECT_SOURCE_DIR})
 
 set(STB_IMAGE_DIR third_party/stb_image)
 
