@@ -6,3 +6,21 @@ http_archive(
     sha256 = "3d9e271e2876ba42e114c9b9bc51454e379cbf0ec9ef9d40e2ae4cec61a31b40",
     strip_prefix = "rules_cc-0.0.6",
 )
+
+new_local_repository(
+    name = "glfw",
+    path = "third_party/glfw",
+    build_file = "third_party/glfw/BUILD",
+)
+
+new_local_repository(
+    name = "opencv",
+    path = "third_party/opencv",
+    build_file = "third_party/opencv/BUILD",
+)
+
+new_local_repository(
+    name = "glew",
+    path = "third_party/glew",
+    build_file = "third_party/glew/BUILD",
+)

@@ -23,10 +23,10 @@ cc_binary(
         "include/Window.h"
     ],
     deps = [
-        "//third_party/glew:glew",
-        "//third_party/glfw:glfw",
-        "//third_party/opencv:opencv",
-        "//third_party/stb_image:stb_image"
+        "@glfw//:glfw",
+        "@opencv//:opencv",
+        "//third_party/stb_image:stb_image",
+        "@glew//:glew"
     ],
     data = [
         "res/shaders/fragment.shader",
